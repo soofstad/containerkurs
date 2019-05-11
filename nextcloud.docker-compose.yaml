@@ -1,0 +1,38 @@
+version: '2.1'
+
+services:
+
+  nextcloud:
+    image: nextcloud:15.0.7
+    container_name: nextcloud_APP
+    hostname: nextcloud
+    domainname: nextcloud.ofstad.xyz
+    dns: 
+      - 192.168.1.5
+      - 1.1.1.1
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "34879:80"
+    environment:
+      - TZ=Europe/Oslo
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_HOST=db
+      - NEXTCLOUD_ADMIN_USER=admin
+    volumes:
+      - ./data/www:/var/www/html
+  db:
+    image: postgres:11.2-alpine
+    container_name: nextcloud_DB
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - TZ=Europe/Oslo
+    restart: unless-stopped
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./data/tmp:/tmp/dump
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+    command: -c 'config_file=/etc/postgresql/postgresql.conf'
